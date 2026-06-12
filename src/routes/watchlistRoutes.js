@@ -6,6 +6,8 @@ import {
   updateWatchlistItemController,
 } from "../controllers/watchlistController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { validateRequest } from "../middleware/validateRequest.js";
+import { addToWatchlistSchema } from "../validators/watchlistvalidators.js";
 
 const router = express.Router();
 
@@ -13,7 +15,11 @@ router.use(authMiddleware);
 
 router.get("/", getWatchlistController);
 
-router.post("/", addToWatchlistController);
+router.post(
+  "/",
+  validateRequest(addToWatchlistSchema),
+  addToWatchlistController,
+);
 
 router.delete("/:id", removeMovieFromWatchlistController);
 
