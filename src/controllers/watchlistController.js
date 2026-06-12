@@ -2,7 +2,15 @@ import { prisma } from "../config/db.js";
 
 const getWatchlistController = async (req, res) => {
   try {
-    res.json({ message: "Get watchlist controller hit" });
+    const { id } = req.user;
+
+    const watchlistItems = await prisma.watchListItem.findMany({
+      where: { userId: id },
+      include: {
+        movie: true,
+      },
+    });
+    res.json({ status: "success", data: { watchlistItems } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -48,6 +56,41 @@ const addToWatchlistController = async (req, res) => {
   });
 };
 
+const updateWatchlistItemController = async (req, res) => {
+  const { id } = req.params;
+  const { status, rating, notes } = req.body;
+
+  const watchlistItem = await prisma.watchListItem.findUnique({
+    where: { id: id },
+  });
+
+  if (!watchlistItem) {
+    return res.status(404).json({ message: "Watchlist item not found" });
+  }
+
+  if (watchlistItem.userId !== req.user.id) {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to update this item" });
+  }
+
+  const updatedData = {};
+
+  if (status !== undefined) updatedData.status = status.toUpperCase();
+  if (rating !== undefined) updatedData.rating = rating;
+  if (notes !== undefined) updatedData.notes = notes;
+
+  const updateWatchlistItem = await prisma.watchListItem.update({
+    where: { id: id },
+    data: updatedData,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: { watchlistItem: updateWatchlistItem },
+  });
+};
+
 const removeMovieFromWatchlistController = async (req, res) => {
   const { id } = req.params;
 
@@ -76,5 +119,6 @@ const removeMovieFromWatchlistController = async (req, res) => {
 export {
   getWatchlistController,
   addToWatchlistController,
+  updateWatchlistItemController,
   removeMovieFromWatchlistController,
 };

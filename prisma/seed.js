@@ -2,7 +2,7 @@
 
 import { prisma } from "../src/config/db.js";
 
-const userId = "4febcc6c-9dfe-4960-81a2-0723c72dcdf7";
+const userId = "10b8bb21-ba6c-4e65-8a62-d75f28bd146b";
 
 const movies = [
   {
